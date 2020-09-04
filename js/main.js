@@ -1,7 +1,7 @@
 // set the dimensions and margins of the graph
 var svg
-var margin = {top: 10, right: 30, bottom: 30, left: 60},
-    width = 1500 - margin.left - margin.right,
+var margin = {top: 20, right: 30, bottom: 50, left: 60},
+    width = 1800 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
@@ -22,29 +22,32 @@ function callback(data){
   console.log(total)
 
   var x = d3.scaleTime()
-  .domain([1979,2020])
-  .range([ 0, width ]);
+    .domain([1979,2020])
+    .range([ 0, width ]);
   svg.append("g")
-  .attr("stroke", "white")
-  .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x));
+    .attr("class","xAxis")
+    .attr("stroke", "white")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x)
+      .tickFormat(d3.format("d"))
+      .ticks(41)
+    )
+    .selectAll("text")
+        .attr("class","xLabels")
+        .attr("transform", "translate(0,5)rotate(-35)")
+        .style("text-anchor", "end");
   
-
-  // Add Y axis
   var y = d3.scaleLinear()
     .domain([0, 200])
     .range([ height, 0 ]);
+
   svg.append("g")
-  .attr("stroke", "white")
+  .attr("class","yAxis")
+    .attr("stroke", "white")
     .call(d3.axisLeft(y));
 
-  // Add the line
-  svg.append("path")
+  var path = svg.append("path")
     .datum(total)
-    .sort(function(a, b){
-      //this function sorts from highest to lowest values
-      return b.Total.Year - a.Total.Year
-      })
     .attr("fill", "none")
     .attr("stroke", "red")
     .attr("stroke-width", 1.5)
@@ -53,6 +56,6 @@ function callback(data){
       .y(function(d) { return y(d.Count) })
       .curve(d3.curveMonotoneX)
       )
-
+      path.lower()
 }
 

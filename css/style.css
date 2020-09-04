@@ -4,3 +4,10 @@ html{
 #line{
     color: white
 }
+.xAxis{
+    font-size: 0.8em;
+}
+
+.yAxis{
+    font-size: 0.8em;
+}
