@@ -11,3 +11,30 @@ html{
 .yAxis{
     font-size: 0.8em;
 }
+.dropdown{
+    height: 3vh;
+    width: 12.5%;
+    font-size: 1.1em;
+    margin-left: 10%;
+    margin-top: 3%;
+    position: absolute;
+}
+#line{
+    margin-top: 0%;
+}
+h1{
+    color: white;
+    text-align: center;
+    margin-bottom: -2%;
+    font-family: 'Roboto', sans-serif;
+}
+.tdAxisLabel, .yearAxisLabel{
+    font-size: 1.5em;
+    fill: white;
+    font-family: 'Roboto', sans-serif;
+}
+.lineLegend{
+    font-size: 1.2em;
+    fill: white;
+    font-family: 'Roboto', sans-serif;
+}

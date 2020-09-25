@@ -1,8 +1,8 @@
 // set the dimensions and margins of the graph
 var svg
-var margin = {top: 50, right: 30, bottom: 40, left: 60},
-    width = 1800 - margin.left - margin.right,
-    height = 800 - margin.top - margin.bottom;
+var margin = {top: 50, right: 100, bottom: 100, left: 100},
+    width = (window.innerWidth*0.95) - margin.left - margin.right,
+    height = (window.innerHeight*0.9) - margin.top - margin.bottom;
 var LBJ,LB,MEJ,JK, RW, JH, NJ, MJ, RR, GH;
 
 // append the svg object to the body of the page
@@ -13,6 +13,42 @@ var svg = d3.select("#line")
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
+
+svg.append("text")
+  .attr("class","tdAxisLabel")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 0 - margin.left)
+  .attr("x",0 - (height / 2))
+  .attr("dy", "2em")
+  .style("text-anchor", "middle")
+  .text("Triple Doubles");
+
+svg.append("text")
+  .attr("class","yearAxisLabel")
+  .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 25) + ")")
+  .style("text-anchor", "middle")
+  .text("Year");
+
+var legend_keys = ["Total from NBA", "Total from Selected Player"]
+
+var lineLegend = svg.selectAll(".lineLegend").data(legend_keys)
+    .enter().append("g")
+    .attr("class","lineLegend")
+    .attr("transform", function (d,i) {
+            return "translate(" + (width*.8) + "," + (i*25)*1.15+")";
+        });
+
+lineLegend.append("text").text(function (d) {return d;})
+    .attr("transform", "translate(25,15)"); 
+
+lineLegend.append("rect")
+    .attr("fill", function (d, i) {
+      if(d == "Total from NBA"){return "purple"}
+      else{return "Green"}
+     })
+    .attr("width", 15).attr("height", 15);
 
 var promises = [];
 promises.push(d3.csv("data/Triple_Doubles_Totals.csv"))
@@ -72,26 +108,33 @@ function callback(data){
     .attr("class", "mainLine")
     .attr("fill", "none")
     .attr("stroke", "purple")
-    .attr("stroke-width", 1.5)
+    .attr("stroke-width", 1.75)
     .attr("d", d3.line()
       .x(function(d) { return x(d.Year)})
       .y(function(d) { return y(d.Count) })
       .curve(d3.curveMonotoneX)
       )
       path.lower()
-  
+  var totalLength = path.node().getTotalLength();
 
-createDropdown(svg,x,y,LBJ,LB,MEJ,JK, RW, JH, NJ, MJ, RR, GH)
+  path
+  .attr("stroke-dasharray", totalLength)
+  .attr("stroke-dashoffset", totalLength)
+  .transition()
+  .duration(5000)
+  .attr("stroke-dashoffset", 0);
+
+createDropdown(svg,x,y)
 }
-function createDropdown(svg,x,y,LBJ,LB,MEJ,JK, RW, JH, NJ, MJ, RR, GH){
-  var ballers = ['LeBron James', 'Larry Bird', 'Magic Johnson', 'Jason Kidd','Russell Westbrook','James Harden','Nikola Jokić', 'Michael Jordan','Rajon Rondo', 'Grant Hill']
+function createDropdown(svg,x,y){
+  var ballers = {'LeBron James':'LBJ', 'Larry Bird':'LB', 'Magic Johnson':'MEJ', 'Jason Kidd':'JK','Russell Westbrook':'RW','James Harden':'JH','Nikola Jokić':'NJ', 'Michael Jordan':'MJ','Rajon Rondo':'RR', 'Grant Hill':'GH'}
 
   var dropdown = d3.select(".dropdownDiv")
     .append("select")
     .attr("class","dropdown")
     .attr("id","dropdown")
     .on("change",function(){
-      addPlayerLine(svg,x,y,LBJ,LB,MEJ,JK, RW, JH, NJ, MJ, RR, GH, this.value)
+      addPlayerLine(svg,x,y, this.value, ballers)
     })
   
   var titleOption = dropdown.append("option")
@@ -100,55 +143,48 @@ function createDropdown(svg,x,y,LBJ,LB,MEJ,JK, RW, JH, NJ, MJ, RR, GH){
   .text("Select A Player...");
 
   var attrOptions = dropdown.selectAll("attrOptions")
-        .data(ballers) //the list of data inside the dropdown menu
+        .data(Object.keys(ballers)) //the list of data inside the dropdown menu
         .enter()
         .append("option")
         .attr("value", function(d){ return d })
         .text(function(d){ return d });
 }
-function addPlayerLine(svg,x,y,LBJ,LB,MEJ,JK, RW, JH, NJ, MJ, RR, GH, selectedBaller){
-  var correctBaller
-  if(selectedBaller == 'LeBron James'){
-    correctBaller = LBJ
-  }
-  if(selectedBaller == 'Larry Bird'){
-    correctBaller = LB
-  }
-  if(selectedBaller == 'Magic Johnson'){
-    correctBaller = MEJ
-  }
-  if(selectedBaller == 'Jason Kidd'){
-    correctBaller = JK
-  }
-  if(selectedBaller == 'Russell Westbrook'){
-    correctBaller = RW
-  }
-  if(selectedBaller == 'James Harden'){
-    correctBaller = JH
-  }
-  if(selectedBaller == 'Nikola Jokić'){
-    correctBaller = NJ
-  }
-  if(selectedBaller == 'Michael Jordan'){
-    correctBaller = MJ
-  }
-  if(selectedBaller == 'Rajon Rondo'){
-    correctBaller = RR
-  }
-  if(selectedBaller == 'Grant Hills'){
-    correctBaller = GH
-  }
-  
+function addPlayerLine(svg,x,y,selectedBaller, ballers){
+  svg.selectAll("#ballerLine")
+    .remove()
+  var select;
+
+  for(var b in ballers){
+      if(b == selectedBaller){
+          select = String(ballers[b])
+      }
+  };
+
+  select = eval(select)
+
   var ballerPath = svg.append("path")
-    .datum(correctBaller)
-    .attr("class","mainLine")
+    .datum(select)
+    .attr("id","ballerLine")
     .attr("fill","none")
     .attr("stroke","green")
-    .attr("stroke-width", 1.5)
+    .attr("stroke-width", 1.75)
     .attr("d", d3.line()
       .x(function(d) { return x(d.Year)})
-      .y(function(d) { return y(d.Count) })
+      .y(function(d) { return y(d.Count)})
       .curve(d3.curveMonotoneX)
       )
-      path.lower()
+     
+    var totalLength = ballerPath.node().getTotalLength();
+
+    ballerPath
+    .attr("stroke-dasharray", totalLength)
+    .attr("stroke-dashoffset", totalLength)
+    .transition()
+    .duration(3000)
+    .attr("stroke-dashoffset", 0);
+
+    ballerPath.lower()
 }
+
+
+	
