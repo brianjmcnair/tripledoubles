@@ -31,7 +31,7 @@ svg.append("text")
   .style("text-anchor", "middle")
   .text("Year");
 
-var legend_keys = ["Total from NBA", "Total from Selected Player"]
+var legend_keys = ["NBA", "Selected Player"]
 
 var lineLegend = svg.selectAll(".lineLegend").data(legend_keys)
     .enter().append("g")
@@ -45,7 +45,7 @@ lineLegend.append("text").text(function (d) {return d;})
 
 lineLegend.append("rect")
     .attr("fill", function (d, i) {
-      if(d == "Total from NBA"){return "purple"}
+      if(d == "NBA"){return "purple"}
       else{return "Green"}
      })
     .attr("width", 15).attr("height", 15);
