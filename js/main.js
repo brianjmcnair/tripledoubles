@@ -1,5 +1,5 @@
 // set the dimensions and margins of the graph
-var svg
+var svg, x, y, focus, focusText, total, rect, mouseG, tooltip, tooltiptext;
 var margin = {top: 50, right: 100, bottom: 100, left: 100},
     width = (window.innerWidth*0.95) - margin.left - margin.right,
     height = (window.innerHeight*0.9) - margin.top - margin.bottom;
@@ -76,9 +76,8 @@ function callback(data){
   MJ = data[8]
   RR = data[9]
   GH = data[10]
-  console.log(total)
 
-  var x = d3.scaleTime()
+  x = d3.scaleLinear()
     .domain([1979,2020])
     .range([ 0, width ]);
   svg.append("g")
@@ -92,9 +91,9 @@ function callback(data){
     .selectAll("text")
         .attr("class","xLabels")
         .attr("transform", "translate(0,5)rotate(-35)")
-        .style("text-anchor", "end");
+        .style("text-anchor", "end")
   
-  var y = d3.scaleLinear()
+  y = d3.scaleLinear()
     .domain([0, 200])
     .range([ height, 0 ]);
 
@@ -103,7 +102,10 @@ function callback(data){
     .attr("stroke", "white")
     .call(d3.axisLeft(y));
 
-  var path = svg.append("path")
+  var g = svg.append("g")
+    .attr("class","total")    
+
+  var path = g.append("path")
     .datum(total)
     .attr("class", "mainLine")
     .attr("fill", "none")
@@ -115,17 +117,81 @@ function callback(data){
       .curve(d3.curveMonotoneX)
       )
       path.lower()
+
   var totalLength = path.node().getTotalLength();
 
   path
   .attr("stroke-dasharray", totalLength)
   .attr("stroke-dashoffset", totalLength)
   .transition()
-  .duration(5000)
+  .duration(3000)
   .attr("stroke-dashoffset", 0);
+
+  mouseG = svg.append("g")
+  .attr("class", "mouse-over-effects"); 
+
+  mouseG.append("path") // this is the black vertical line to follow mouse
+    .attr("class", "mouse-line")
+    .style("stroke", "white")
+    .style("stroke-width", "1px")
+
+  tooltip = g.append("g")                                
+    .style("display", "none");  
+
+    // append the circle at the intersection               
+  tooltip.append("circle")                                 
+    .attr("class", "totalCircle")                                                            
+    .style("stroke", "purple")  
+    .style("fill","black")                         
+    .attr("r", 9);
+
+  tooltiptext = tooltip.append("text")
+    .attr("class","tooltip-text")
+    .attr("stroke","white")
+
+  bisect = d3.bisector(function(d) { return d.Year; }).left
+
+  rect = svg
+    .append('rect')
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .attr('width', width)
+    .attr('height', height)
+    .on('mouseover', function() { 
+      tooltip.style("display", null),
+      tooltiptext.style("display",null)
+      mouseG.style("opacity","1"),
+      mouseG.lower(); 
+      })
+    .on('mouseout', function() { 
+      tooltip.style("display", "none"),
+      tooltiptext.style("display","none")
+      mouseG.style("opacity","0"); 
+      })
+    .on('mousemove', mousemove);
+
+    function mousemove() {
+      var x0 = x.invert(d3.mouse(this)[0]),
+          i = bisect(total, x0, 1),
+          d0 = total[i - 1],
+          d1 = total[i],
+          d = x0 - d0.Year > d1.Year - x0 ? d1 : d0;
+          tooltip.select("circle.totalCircle")                           
+              .attr("transform", "translate(" + x(d.Year)+"," + y(d.Count) + ")")
+          tooltiptext
+              .text("Triple Doubles: "+d.Count)
+              .attr("transform","translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")");
+          d3.select(".mouse-line")
+              .attr("d", function() {
+                var m = "M" + x(d.Year) + "," + height;
+                m += " " + x(d.Year) + "," + 0;
+                return m;
+              })
+  }
 
 createDropdown(svg,x,y)
 }
+
 function createDropdown(svg,x,y){
   var ballers = {'LeBron James':'LBJ', 'Larry Bird':'LB', 'Magic Johnson':'MEJ', 'Jason Kidd':'JK','Russell Westbrook':'RW','James Harden':'JH','Nikola Jokić':'NJ', 'Michael Jordan':'MJ','Rajon Rondo':'RR', 'Grant Hill':'GH'}
 
@@ -162,7 +228,10 @@ function addPlayerLine(svg,x,y,selectedBaller, ballers){
 
   select = eval(select)
 
-  var ballerPath = svg.append("path")
+  var g = svg.append("g")
+    .attr("class","select")
+
+  var ballerPath = g.append("path")
     .datum(select)
     .attr("id","ballerLine")
     .attr("fill","none")
@@ -174,17 +243,77 @@ function addPlayerLine(svg,x,y,selectedBaller, ballers){
       .curve(d3.curveMonotoneX)
       )
      
-    var totalLength = ballerPath.node().getTotalLength();
+  var totalLength = ballerPath.node().getTotalLength();
 
-    ballerPath
+  ballerPath
     .attr("stroke-dasharray", totalLength)
     .attr("stroke-dashoffset", totalLength)
     .transition()
     .duration(3000)
     .attr("stroke-dashoffset", 0);
 
-    ballerPath.lower()
+  var tooltip2 = g.append("g")                                
+    .style("display", "none");  
+
+    // append the circle at the intersection               
+  tooltip2.append("circle")                                 
+    .attr("class", "ballerCircle")                                                            
+    .style("stroke", "green")  
+    .style("fill","black")                         
+    .attr("r", 9);
+  
+  tooltiptext2 = tooltip2.append("text")
+    .attr("class","tooltip-text2")
+    .attr("stroke","white")
+
+  bisect = d3.bisector(function(d) { return d.Year; }).left
+
+  rect
+    .on('mouseover', function() { 
+      tooltip.style("display", null),
+      tooltiptext.style("display",null)
+      mouseG.style("opacity","1"),
+      mouseG.lower()
+      tooltip2.style("display", null),
+      tooltiptext2.style("display",null);
+    })
+    .on('mouseout', function() { 
+      tooltip2.style("display", "none"),
+      tooltip.style("display", "none"),
+      tooltiptext.style("display","none"),
+      tooltiptext2.style("display","none"),
+      mouseG.style("opacity","0"); 
+      })
+    .on('mousemove', mousemove);
+
+    function mousemove() {
+      var x0 = x.invert(d3.mouse(this)[0]),
+          i = bisect(total, x0, 1),
+          d0 = total[i - 1],
+          d1 = total[i],
+          d = x0 - d0.Year > d1.Year - x0 ? d1 : d0;
+          i2 = bisect(select, x0, 1),
+          d0b = select[i2 - 1],
+          d1b = select[i2],
+          d2 = x0 - d0b.Year > d1b.Year - x0 ? d1b : d0b;
+          tooltip.select("circle.totalCircle")                           
+              .attr("transform", "translate(" + x(d.Year) + "," + y(d.Count) + ")")
+          tooltiptext
+              .text("Triple Doubles: "+d.Count)
+              .attr("transform","translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")");
+          d3.select(".mouse-line")
+              .attr("d", function() {
+                var m = "M" + x(d.Year) + "," + height;
+                m += " " + x(d.Year) + "," + 0;
+                return m;
+              })
+          tooltip2.select("circle.ballerCircle")                     
+              .attr("transform", "translate(" + x(d2.Year) + "," + y(d2.Count) + ")")
+          tooltiptext2
+              .text("Triple Doubles: "+d2.Count)
+              .attr("transform","translate(" + (x(d2.Year) +10)+ "," + (y(d2.Count) - 10)+ ")");
+  }
+  d3.select('.xAxis')
+  .raise();
+  ballerPath.lower()
 }
-
-
-	
