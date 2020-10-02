@@ -52,16 +52,16 @@ lineLegend.append("rect")
 
 var promises = [];
 promises.push(d3.csv("data/Triple_Doubles_Totals.csv"))
-promises.push(d3.csv("data/Lebron_James_td_counts.csv"))
-promises.push(d3.csv("data/Larry_Bird_td_counts.csv"))
-promises.push(d3.csv("data/Magic_Johnson_td_counts.csv"))
-promises.push(d3.csv("data/Jason_Kidd_td_counts.csv"))
-promises.push(d3.csv("data/Russell_Westbrook_td_counts.csv"))
-promises.push(d3.csv("data/James_Harden_td_counts.csv"))
-promises.push(d3.csv("data/Nikola_Jokić_td_counts.csv"))
-promises.push(d3.csv("data/Michael_Jordan_td_counts.csv"))
-promises.push(d3.csv("data/Rajon_Rondo_td_counts.csv"))
-promises.push(d3.csv("data/Grant_Hill_td_counts.csv"))
+promises.push(d3.csv("data/players/Lebron_James_td_counts.csv"))
+promises.push(d3.csv("data/players/Larry_Bird_td_counts.csv"))
+promises.push(d3.csv("data/players/Magic_Johnson_td_counts.csv"))
+promises.push(d3.csv("data/players/Jason_Kidd_td_counts.csv"))
+promises.push(d3.csv("data/players/Russell_Westbrook_td_counts.csv"))
+promises.push(d3.csv("data/players/James_Harden_td_counts.csv"))
+promises.push(d3.csv("data/players/Nikola_Jokić_td_counts.csv"))
+promises.push(d3.csv("data/players/Michael_Jordan_td_counts.csv"))
+promises.push(d3.csv("data/players/Rajon_Rondo_td_counts.csv"))
+promises.push(d3.csv("data/players/Grant_Hill_td_counts.csv"))
 Promise.all(promises).then(callback);
 
 function callback(data){
