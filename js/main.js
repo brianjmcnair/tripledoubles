@@ -52,16 +52,16 @@ lineLegend.append("rect")
 
 var promises = [];
 promises.push(d3.csv("data/Triple_Doubles_Totals.csv"))
-promises.push(d3.csv("data/Lebron James_td_counts.csv"))
-promises.push(d3.csv("data/Larry Bird_td_counts.csv"))
-promises.push(d3.csv("data/Magic Johnson_td_counts.csv"))
-promises.push(d3.csv("data/Jason Kidd_td_counts.csv"))
-promises.push(d3.csv("data/Russell Westbrook_td_counts.csv"))
-promises.push(d3.csv("data/James Harden_td_counts.csv"))
-promises.push(d3.csv("data/Nikola Jokić_td_counts.csv"))
-promises.push(d3.csv("data/Michael Jordan_td_counts.csv"))
-promises.push(d3.csv("data/Rajon Rondo_td_counts.csv"))
-promises.push(d3.csv("data/Grant Hill_td_counts.csv"))
+promises.push(d3.csv("data/Lebron_James_td_counts.csv"))
+promises.push(d3.csv("data/Larry_Bird_td_counts.csv"))
+promises.push(d3.csv("data/Magic_Johnson_td_counts.csv"))
+promises.push(d3.csv("data/Jason_Kidd_td_counts.csv"))
+promises.push(d3.csv("data/Russell_Westbrook_td_counts.csv"))
+promises.push(d3.csv("data/James_Harden_td_counts.csv"))
+promises.push(d3.csv("data/Nikola_Jokić_td_counts.csv"))
+promises.push(d3.csv("data/Michael_Jordan_td_counts.csv"))
+promises.push(d3.csv("data/Rajon_Rondo_td_counts.csv"))
+promises.push(d3.csv("data/Grant_Hill_td_counts.csv"))
 Promise.all(promises).then(callback);
 
 function callback(data){
@@ -147,7 +147,6 @@ function callback(data){
 
   tooltiptext = tooltip.append("text")
     .attr("class","tooltip-text")
-    .attr("stroke","white")
 
   bisect = d3.bisector(function(d) { return d.Year; }).left
 
@@ -179,7 +178,7 @@ function callback(data){
           tooltip.select("circle.totalCircle")                           
               .attr("transform", "translate(" + x(d.Year)+"," + y(d.Count) + ")")
           tooltiptext
-              .text("Triple Doubles: "+d.Count)
+              .text("NBA Total:  "+d.Count)
               .attr("transform","translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")");
           d3.select(".mouse-line")
               .attr("d", function() {
@@ -264,7 +263,6 @@ function addPlayerLine(svg,x,y,selectedBaller, ballers){
   
   tooltiptext2 = tooltip2.append("text")
     .attr("class","tooltip-text2")
-    .attr("stroke","white")
 
   bisect = d3.bisector(function(d) { return d.Year; }).left
 
@@ -294,12 +292,12 @@ function addPlayerLine(svg,x,y,selectedBaller, ballers){
           d = x0 - d0.Year > d1.Year - x0 ? d1 : d0;
           i2 = bisect(select, x0, 1),
           d0b = select[i2 - 1],
-          d1b = select[i2],
+          d1b = select[i2];
           d2 = x0 - d0b.Year > d1b.Year - x0 ? d1b : d0b;
           tooltip.select("circle.totalCircle")                           
               .attr("transform", "translate(" + x(d.Year) + "," + y(d.Count) + ")")
           tooltiptext
-              .text("Triple Doubles: "+d.Count)
+              .text("NBA Total: "+d.Count)
               .attr("transform","translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")");
           d3.select(".mouse-line")
               .attr("d", function() {
@@ -310,7 +308,7 @@ function addPlayerLine(svg,x,y,selectedBaller, ballers){
           tooltip2.select("circle.ballerCircle")                     
               .attr("transform", "translate(" + x(d2.Year) + "," + y(d2.Count) + ")")
           tooltiptext2
-              .text("Triple Doubles: "+d2.Count)
+              .text(selectedBaller + " : "+d2.Count)
               .attr("transform","translate(" + (x(d2.Year) +10)+ "," + (y(d2.Count) - 10)+ ")");
   }
   d3.select('.xAxis')
