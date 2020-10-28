@@ -133,7 +133,7 @@ function callback(data){
   mouseG.append("path") // this is the black vertical line to follow mouse
     .attr("class", "mouse-line")
     .style("stroke", "white")
-    .style("stroke-width", "1px")
+    .style("stroke-width", "0.65px")
 
   tooltip = g.append("g")                                
     .style("display", "none");  
@@ -179,7 +179,13 @@ function callback(data){
               .attr("transform", "translate(" + x(d.Year)+"," + y(d.Count) + ")")
           tooltiptext
               .text("NBA Total:  "+d.Count)
-              .attr("transform","translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")");
+              .attr("transform",function(){
+                if(d.Year > 2017){
+                  return "translate(" + (x(d.Year) - 115)+ "," + (y(d.Count) - 10)+ ")"
+                }
+                else{
+                  return "translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")";}
+                })
           d3.select(".mouse-line")
               .attr("d", function() {
                 var m = "M" + x(d.Year) + "," + height;
@@ -216,6 +222,8 @@ function createDropdown(svg,x,y){
 }
 function addPlayerLine(svg,x,y,selectedBaller, ballers){
   svg.selectAll("#ballerLine")
+    .remove()
+  svg.selectAll("#tooltip-text2")
     .remove()
   var select;
 
@@ -262,7 +270,8 @@ function addPlayerLine(svg,x,y,selectedBaller, ballers){
     .attr("r", 9);
   
   tooltiptext2 = tooltip2.append("text")
-    .attr("class","tooltip-text2")
+    .attr("id","tooltip-text2")
+
 
   bisect = d3.bisector(function(d) { return d.Year; }).left
 
@@ -288,28 +297,68 @@ function addPlayerLine(svg,x,y,selectedBaller, ballers){
       var x0 = x.invert(d3.mouse(this)[0]),
           i = bisect(total, x0, 1),
           d0 = total[i - 1],
-          d1 = total[i],
+          d1 = total[i];
           d = x0 - d0.Year > d1.Year - x0 ? d1 : d0;
           i2 = bisect(select, x0, 1),
           d0b = select[i2 - 1],
           d1b = select[i2];
-          d2 = x0 - d0b.Year > d1b.Year - x0 ? d1b : d0b;
+          
           tooltip.select("circle.totalCircle")                           
               .attr("transform", "translate(" + x(d.Year) + "," + y(d.Count) + ")")
           tooltiptext
-              .text("NBA Total: "+d.Count)
-              .attr("transform","translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")");
+              .text("NBA Total:  "+d.Count)
+              .attr("transform",function(){
+                if(d.Year > 2017){
+                  return "translate(" + (x(d.Year) - 115)+ "," + (y(d.Count) - 10)+ ")"
+                }
+                else{
+                  return "translate(" + (x(d.Year) +10)+ "," + (y(d.Count) - 10)+ ")";}
+                })
           d3.select(".mouse-line")
               .attr("d", function() {
                 var m = "M" + x(d.Year) + "," + height;
                 m += " " + x(d.Year) + "," + 0;
                 return m;
               })
-          tooltip2.select("circle.ballerCircle")                     
-              .attr("transform", "translate(" + x(d2.Year) + "," + y(d2.Count) + ")")
+
+          if(d1b === undefined){
+            d2 = 0
+            tooltip2.select("circle.ballerCircle").style("opacity","0")
+            tooltiptext2.style("opacity","0")
+          }
+          if(d1b != undefined){
+            d2 = x0 - d0b.Year > d1b.Year - x0 ? d1b : d0b;
+          }
+          
+
+          if(d2.Year == d.Year){
+            tooltip2.select("circle.ballerCircle")                     
+            .attr("transform", "translate(" + x(d2.Year) + "," + y(d2.Count) + ")")
+            .style("opacity","1")
+
           tooltiptext2
               .text(selectedBaller + " : "+d2.Count)
-              .attr("transform","translate(" + (x(d2.Year) +10)+ "," + (y(d2.Count) - 10)+ ")");
+              .attr("transform",function(){
+                if(d2.Year > 2017){
+                  length = document.getElementById('tooltip-text2')
+                  length = length.getBoundingClientRect().width
+                  return "translate(" + + (x(d2.Year) - (length+10))+ "," + (y(d2.Count) - 10)+ ")"
+                }
+                else{
+                  return "translate(" + (x(d2.Year) +10)+ "," + (y(d2.Count) - 10)+ ")"
+                }
+              })
+              .style("opacity","1")
+          }
+
+          if(d2.Year != d.Year){
+            tooltip2.select("circle.ballerCircle").style("opacity","0")
+            tooltiptext2.style("opacity","0")
+          }
+          
+          
+
+          
   }
   d3.select('.xAxis')
   .raise();
